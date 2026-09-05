@@ -1,0 +1,25 @@
+{
+    "status": "done",
+    "result": {
+        "doc_type": "Non-disclosure agreement",
+        "parties": [
+            "Disclosing Party",
+            "Receiving Party"
+        ],
+        "summary": "This is a standard mutual or one-way nondisclosure agreement designed to protect proprietary information shared between two parties. It defines what constitutes confidential information, outlines the receiving party's obligations to protect it, and details standard legal boilerplate including severability and integration. The agreement lasts indefinitely until the information loses trade secret status or the disclosing party releases the obligation.",
+        "key_terms": [
+            "Duration: Survives termination and lasts until information no longer qualifies as a trade secret or is released in writing",
+            "Governing Law: Not specified in the text",
+            "Payment: None"
+        ],
+        "risks": [
+            {
+                "clause_title": "Indefinite Confidentiality",
+                "severity": "medium",
+                "explanation": "The obligation to protect confidential information lasts until it no longer qualifies as a trade secret, which can be indefinitely, creating long-term compliance burdens.",
+                "quote": "remain in effect until the Confidential Information no longer qualifies as a trade secret",
+                "suggestion": "Negotiate a specific time limit for confidentiality, such as 2 to 5 years from the date of disclosure."
+            }
+        ]
+    }
+}
