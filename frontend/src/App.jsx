@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { wake, startAnalysis, getJob } from "./api";
 import Finding from "./components/Finding";
 import sample from "./sampleAnalysis.json";
+import Dropzone from "./components/Dropzone";
+import Progress from "./components/Progress";
 import Chat from "./components/Chat";
 
 export default function App() {
@@ -54,49 +56,27 @@ export default function App() {
     <div className="mx-auto max-w-[46rem] px-5 py-12 sm:py-20">
       <header className="mb-12">
         <h1 className="font-doc text-[2.4rem] leading-[1.1] sm:text-[3rem]">
-          Read the contract you're about to sign
+          Know what you're agreeing to
         </h1>
         <p className="mt-4 max-w-[34rem] text-[16px] leading-relaxed text-muted">
-          Upload a PDF and get a plain-language summary, plus the clauses that
-          deserve a second look before you agree to them.
+          Upload a contract, invoice, or policy. Get a plain-language summary and
+          the parts that deserve a second look.
         </p>
       </header>
 
       {status !== "done" && (
         <section>
-          <input
-            ref={fileInput}
-            type="file"
-            accept="application/pdf"
-            capture="environment"
-            className="hidden"
-            onChange={(e) => handleFile(e.target.files?.[0])}
-          />
+          <Dropzone onFile={handleFile} disabled={status === "working"} />
 
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => fileInput.current?.click()}
-              disabled={status === "working"}
-              className="rounded-md bg-ink px-5 py-3 text-[15px] font-medium text-paper disabled:opacity-40"
-            >
-              Choose a PDF
-            </button>
-            <button
-              onClick={showSample}
-              disabled={status === "working"}
-              className="rounded-md border border-rule px-5 py-3 text-[15px] disabled:opacity-40"
-            >
-              See a sample first
-            </button>
-          </div>
+          <button
+            onClick={showSample}
+            disabled={status === "working"}
+            className="mt-4 text-[15px] underline underline-offset-4 decoration-rule hover:decoration-ink"
+          >
+            Or see a sample analysis first
+          </button>
 
-          <p className="mt-4 text-[14px] text-muted">
-            Up to 60 pages. Your file is read once and never stored.
-          </p>
-
-          {status === "working" && (
-            <p className="mt-8 text-[15px] text-muted">{note}…</p>
-          )}
+          {status === "working" && <Progress pages={meta?.pages} />}
           {status === "error" && (
             <p className="mt-8 border-l-[3px] border-high pl-4 text-[15px]">{note}</p>
           )}
@@ -107,9 +87,10 @@ export default function App() {
         <>
           <section className="border-t border-rule pt-8">
             <p className="text-[14px] text-muted">
-              {meta?.name} · {analysis.doc_type}
+              {meta?.name} · {analysis.doc_type_label || analysis.doc_type}
               {analysis.parties?.length ? ` · ${analysis.parties.join(" and ")}` : ""}
             </p>
+
             <p className="mt-4 text-[17px] leading-relaxed">{analysis.summary}</p>
 
             {analysis.key_terms?.length > 0 && (
@@ -122,18 +103,43 @@ export default function App() {
           </section>
 
           <section className="mt-12 border-t border-rule pt-8">
-            <h2 className="mb-8 text-[15px] font-medium text-muted">
-              {analysis.risks.length === 0
+            <h2 className="text-[15px] font-medium text-muted">
+              {analysis.findings.length === 0
                 ? "Nothing stood out as unusual."
-                : `${analysis.risks.length} clause${analysis.risks.length > 1 ? "s" : ""} worth a closer look`}
+                : `${analysis.findings.length} thing${analysis.findings.length > 1 ? "s" : ""} worth a closer look`}
             </h2>
-            {analysis.risks.map((r, i) => <Finding key={i} risk={r} />)}
+
+            {analysis.findings.length > 0 && (
+              <div className="mt-4 mb-8 flex flex-wrap gap-x-5 gap-y-2 text-[14px]">
+                {["high", "medium", "low"].map((sev) => {
+                  const n = analysis.findings.filter((f) => f.severity === sev).length;
+                  if (!n) return null;
+                  const color = { high: "bg-high", medium: "bg-medium", low: "bg-low" }[sev];
+                  const word = { high: "significant", medium: "worth reviewing", low: "minor" }[sev];
+                  return (
+                    <span key={sev} className="flex items-center gap-2">
+                      <span className={`h-2 w-2 rounded-full ${color}`} />
+                      {n} {word}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+
+            {analysis.findings.map((f, i) => (
+              <Finding key={i} index={i} risk={f} />
+            ))}
           </section>
 
           {docText && <Chat document={docText} />}
 
           <button
-            onClick={() => { setStatus("idle"); setAnalysis(null); }}
+            onClick={() => {
+              setStatus("idle");
+              setAnalysis(null);
+              setDocText("");
+              setMeta(null);
+            }}
             className="mt-4 text-[15px] underline underline-offset-4"
           >
             Analyze another document

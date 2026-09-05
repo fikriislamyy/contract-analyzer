@@ -2,7 +2,8 @@
     "status": "done",
     "document": "MUTUAL NON-DISCLOSURE AGREEMENT\n\n1. Definition of Confidential Information...",
     "result": {
-        "doc_type": "Non-disclosure agreement",
+        "doc_type": "contract",
+        "doc_type_label": "Mutual NDA",
         "parties": [
             "Disclosing Party",
             "Receiving Party"
@@ -13,9 +14,9 @@
             "Governing Law: Not specified in the text",
             "Payment: None"
         ],
-        "risks": [
+        "findings": [
             {
-                "clause_title": "Indefinite Confidentiality",
+                "title": "Indefinite Confidentiality",
                 "severity": "medium",
                 "explanation": "The obligation to protect confidential information lasts until it no longer qualifies as a trade secret, which can be indefinitely, creating long-term compliance burdens.",
                 "quote": "remain in effect until the Confidential Information no longer qualifies as a trade secret",
