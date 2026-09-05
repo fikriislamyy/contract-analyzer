@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { wake, startAnalysis, getJob } from "./api";
 import Finding from "./components/Finding";
 import sample from "./sampleAnalysis.json";
+import Chat from "./components/Chat";
 
 export default function App() {
   const [status, setStatus] = useState("idle"); // idle | working | done | error
@@ -9,6 +10,7 @@ export default function App() {
   const [analysis, setAnalysis] = useState(null);
   const [meta, setMeta] = useState(null);
   const fileInput = useRef(null);
+  const [docText, setDocText] = useState("");
 
   useEffect(() => { wake(); }, []);
 
@@ -19,7 +21,8 @@ export default function App() {
     setAnalysis(null);
 
     try {
-      const { job_id, pages } = await startAnalysis(file);
+      const { job_id, pages, document } = await startAnalysis(file);
+      setDocText(document);
       setMeta({ name: file.name, pages });
       setNote("Looking for risk");
 
@@ -44,6 +47,7 @@ export default function App() {
     setMeta({ name: "Sample mutual NDA", pages: 3 });
     setAnalysis(sample.result ?? sample);
     setStatus("done");
+    setDocText(sample.document ?? "");
   }
 
   return (
@@ -125,6 +129,8 @@ export default function App() {
             </h2>
             {analysis.risks.map((r, i) => <Finding key={i} risk={r} />)}
           </section>
+
+          {docText && <Chat document={docText} />}
 
           <button
             onClick={() => { setStatus("idle"); setAnalysis(null); }}

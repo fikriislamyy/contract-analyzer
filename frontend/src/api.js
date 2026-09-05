@@ -26,3 +26,37 @@ export async function getJob(jobId) {
     if (!res.ok) throw await unwrapError(res);
     return res.json();
 }
+
+export async function streamChat(document, messages, onChunk, signal) {
+    const res = await fetch(`${API}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ document, messages }),
+        signal,
+    });
+    if (!res.ok) throw await unwrapError(res);
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split("\n\n");
+        buffer = events.pop() ?? "";
+
+        for (const event of events) {
+            const line = event.trim();
+            if (!line.startsWith("data:")) continue;
+            const payload = line.slice(5).trim();
+            if (payload === "[DONE]") return;
+
+            const parsed = JSON.parse(payload);
+            if (parsed.error) throw new Error(parsed.error);
+            if (parsed.t) onChunk(parsed.t);
+        }
+    }
+}

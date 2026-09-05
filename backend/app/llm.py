@@ -42,7 +42,8 @@ def chat_stream(document: str, messages: list[dict]):
     instruction = (
         "Answer questions about the contract below. Ground every answer in the text "
         "and name the clause you are relying on. If the contract does not address "
-        "the question, say so plainly rather than guessing. You are not a lawyer.\n\n"
+        "the question, say so plainly rather than guessing. You are not a lawyer. Write in plain prose with no markdown formatting, "
+        "asterisks, or bullet points.\n\n"
         f"<contract>\n{document}\n</contract>"
     )
     contents = [
